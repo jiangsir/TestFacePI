@@ -1,7 +1,13 @@
 import fire, os, json
 import http.client, urllib.request, urllib.parse, urllib.error, base64
 import classes.ClassFaceAPI
+import classes.ClassOpenCV
+
 class FacePI:
+
+
+    def show_opencv(self):
+        classes.ClassOpenCV.show_opencv('hint')
 
     def Signin(self):
         '''
