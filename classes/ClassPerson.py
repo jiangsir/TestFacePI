@@ -1,10 +1,9 @@
 import http.client, urllib.request, urllib.parse, urllib.error, base64, json
-import classes.ClassConfig as Config
-
+import classes.ClassConfig
+config = classes.ClassConfig.Config().readConfig()
 
 class Person:
     def __init__(self):
-        config = Config().readConfig()
         self.api_key = config["api_key"]
         self.host = config["host"]
 

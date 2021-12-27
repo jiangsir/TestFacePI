@@ -1,9 +1,10 @@
 import fire, os, json
 import http.client, urllib.request, urllib.parse, urllib.error, base64
 import classes.ClassOpenCV
-import classes.ClassFaceAPI as Face
-import classes.ClassPerson as Person
-import classes.ClassPersonGroup as PersonGroup
+import classes.ClassFaceAPI
+import classes.ClassPerson
+import classes.ClassPersonGroup
+import classes.ClassConfig
 
 
 class FacePI:
@@ -22,21 +23,14 @@ class FacePI:
         # imageurl = 'https://cdn2.momjunction.com/wp-content/uploads/2020/11/facts-about-albert-einstein-for-kids-720x810.jpg'
         # classes.ClassFaceAPI.Face().detectImageUrl(imageurl)
         imagepath = classes.ClassOpenCV.show_opencv()
-        json_face_detect = Face().detectLocalImage(imagepath)
+        json_face_detect = classes.ClassFaceAPI.Face().detectLocalImage(imagepath)
 
     def Train(self, userData=None, personname=None):
         """1. 用 3 連拍訓練一個新人"""
-        # personname = input('進行 3 連拍，請輸入要訓練的對象姓名：')
-        # traindatasPath = basepath + '/traindatas/'
-        # traindatasPath = os.path.join(basepath, 'traindatas')
         jpgimagepaths = []
         for i in range(3):
-            jpgimagepath = classes.ClassOpenCV.show_opencv(
-                hint=" (第 " + str(i + 1) + " 張)", size="large"
-            )
+            jpgimagepath = classes.ClassOpenCV.show_opencv(hint=" (訓練第 " + str(i + 1) + " 張)")
             jpgimagepaths.append(jpgimagepath)
-            # time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime()) + ".jpg"
-            # filename = jpgimagepath[jpgimagepath.rfind('/'):]
 
         if personname == None:
             personname = input("請輸入您的姓名: ")
@@ -47,7 +41,6 @@ class FacePI:
         jpgtrainpaths = []
         for jpgimagepath in jpgimagepaths:
             filename = os.path.basename(jpgimagepath)
-            # jpgtraindata = '/home/pi/traindatas/' + personname + filename
             home = os.path.expanduser("~")
             jpgtrainpath = os.path.join(
                 home, "traindatas", userData, personname, filename
@@ -57,10 +50,14 @@ class FacePI:
             os.rename(jpgimagepath, jpgtrainpath)
             jpgtrainpaths.append(jpgtrainpath)
 
-        personAPI = Person()
-        personAPI.add_personimages(personGroupId, personname, userData, jpgtrainpaths)
-        personGroupapi = PersonGroup()
-        personGroupapi.train_personGroup(personGroupId)
+
+        myconfig = classes.ClassConfig.Config()
+        
+
+        personAPI = classes.ClassPerson.Person()
+        personAPI.add_personimages(myconfig['personGroupId'], personname, userData, jpgtrainpaths)
+        personGroupapi = classes.ClassPersonGroup.PersonGroup()
+        personGroupapi.train_personGroup(myconfig['personGroupId'])
 
 
 if __name__ == "__main__":
