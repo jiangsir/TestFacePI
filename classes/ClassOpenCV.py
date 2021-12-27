@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageTk
 import cv2
 import numpy as np
 
-config = classes.ClassConfig.Config().readConfig()
+
 ttf = "C:/Windows.old/Windows/Fonts/msjhbd.ttc"  # 字體: 微軟正黑體
 
 
