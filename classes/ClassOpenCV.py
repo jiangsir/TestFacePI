@@ -28,7 +28,7 @@ def show_opencv(hint='', mirror=True):
 
     #cam = cv2.VideoCapture(config['videoid'])
     print('cam opening...')
-    cam = cv2.VideoCapture(0)
+    cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     print('cam opened')
     cam.set(3, 1280)  # 修改解析度 寬
     cam.set(4, 1280 // 16 * 9)  # 修改解析度 高

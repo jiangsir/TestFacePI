@@ -1,9 +1,8 @@
 import urllib, http, json
-import classes.ClassConfig as Config
-
+import classes.ClassConfig
 class Face:
     def __init__(self) -> None:
-        self.config = Config().readConfig()
+        self.config = classes.ClassConfig.Config().readConfig()
 
         # 用本地端的圖檔進行辨識。
     def detectLocalImage(self, imagepath):
