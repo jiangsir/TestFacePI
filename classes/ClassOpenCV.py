@@ -1,9 +1,10 @@
 import os
 import time
-import classes.ClassConfig
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 import cv2
 import numpy as np
+import classes.ClassConfig
+config = classes.ClassConfig.Config().readConfig()
 
 
 ttf = "C:/Windows.old/Windows/Fonts/msjhbd.ttc"  # 字體: 微軟正黑體
@@ -26,7 +27,7 @@ def show_opencv(hint='', mirror=True):
     ''' 顯示主畫面 '''
 
     #cam = cv2.VideoCapture(config['videoid'])
-    print('open cam')
+    print('cam opening...')
     cam = cv2.VideoCapture(0)
     print('cam opened')
     cam.set(3, 1280)  # 修改解析度 寬

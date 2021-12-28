@@ -59,6 +59,5 @@ class FacePI:
         personGroupapi = classes.ClassPersonGroup.PersonGroup()
         personGroupapi.train_personGroup(myconfig['personGroupId'])
 
-
 if __name__ == "__main__":
     fire.Fire(FacePI)
