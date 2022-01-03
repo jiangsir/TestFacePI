@@ -49,9 +49,9 @@ class FacePI:
 
         print("Identify.detectfaces=", detectfaces)
 
-#        try:
-        identifiedfaces = faceApi.identify(faceids[:10], config['personGroupId'])
-        print("在所提供的相片中偵測到 identifyfaces 共 ", len(identifiedfaces), "個")
+        #        try:
+        identifiedfaces = faceApi.identify(faceids[:10], config["personGroupId"])
+        # print("在所提供的相片中偵測到 identifyfaces 共 ", len(identifiedfaces), "個")
         # except MyException.PersonGroupNotTrainedError as e:
         #     print("接到例外！MyException.PersonGroupNotTrainedError as e")
         #     print("Identify.detectedFaces=", detectfaces)
@@ -65,28 +65,27 @@ class FacePI:
         for identifiedface in identifiedfaces:
             for candidate in identifiedface["candidates"]:
                 personId = candidate["personId"]
-                person = personApi.get_a_person(personId, config['personGroupId'])
+                person = personApi.get_a_person(personId, config["personGroupId"])
                 identifiedface["person"] = person
                 identifiedface["confidence"] = candidate["confidence"]
                 identifiedface["personId"] = candidate["personId"]
 
         ### cv_Identifyfaces() 精簡版
         for identifyface in identifiedfaces:
-            if 'person' not in identifyface:
-                print('identifyface=', identifyface)
-                print('不認識!!')
+            if "person" not in identifyface:
+                print("identifyface=", identifyface)
+                print("無法辨識此人，請先訓練!!")
             else:
-                name = identifyface['person']['name']
-                confidence = float(identifyface['confidence'])
+                name = identifyface["person"]["name"]
+                confidence = float(identifyface["confidence"])
                 if confidence >= 0.9:
-                    return name + ' 簽到成功!!!'
+                    print(name + " 簽到成功!!!")
                 elif confidence >= 0.8:
-                    return name + ' 簽到成功!!'
+                    print(name + " 簽到成功!!")
                 elif confidence >= 0.7:
-                    return name + ' 簽到成功!'
+                    print(name + " 簽到成功!")
                 else:
-                    return name + ' 簽到成功'
-
+                    print(name + " 簽到成功")
 
     def Signin(self):
         """
@@ -100,7 +99,7 @@ class FacePI:
         # imageurl = 'https://cdn2.momjunction.com/wp-content/uploads/2020/11/facts-about-albert-einstein-for-kids-720x810.jpg'
         # classes.ClassFaceAPI.Face().detectImageUrl(imageurl)
         imagepath = classes.ClassOpenCV.show_opencv()
-        #json_face_detect = classes.ClassFaceAPI.Face().detectLocalImage(imagepath)
+        # json_face_detect = classes.ClassFaceAPI.Face().detectLocalImage(imagepath)
         self.Identify(imagepath)
 
     def Train(self, userData=None, personname=None):

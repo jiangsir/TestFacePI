@@ -99,7 +99,7 @@ class Face:
         headers = {
             # Request headers
             "Content-Type": "application/json",
-            "Ocp-Apim-Subscription-Key": self.api_key,
+            "Ocp-Apim-Subscription-Key": self.config["api_key"],
         }
 
         params = urllib.parse.urlencode({})
@@ -120,7 +120,7 @@ class Face:
         )
         # print('requestbody=', requestbody)
         try:
-            conn = http.client.HTTPSConnection(self.host)
+            conn = http.client.HTTPSConnection(self.config['host'])
             conn.request(
                 "POST", "/face/v1.0/identify?%s" % params, requestbody, headers
             )
