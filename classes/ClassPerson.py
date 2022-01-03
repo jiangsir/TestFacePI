@@ -49,7 +49,7 @@ class Person:
             response = conn.getresponse()
             data = response.read()
             jsondata = json.loads(str(data, "UTF-8"))
-            print('add_a_person_face json:')
+            print("add_a_person_face json:")
             conn.close()
 
         except Exception as e:
@@ -102,6 +102,14 @@ class Person:
         except Exception as e:
             print("[Errno {0}]連線失敗！請檢查網路設定。 {1}".format(e.errno, e.strerror))
 
+        if "error" in create_a_person_json:
+            print("Error: " + create_a_person_json["error"]["code"])
+            if create_a_person_json["error"]["code"] == "PersonGroupNotFound":
+                personGroupApi = classes.ClassPersonGroup.PersonGroup()
+                personGroupApi.createPersonGroup(
+                    config["personGroupId"], config["personGroupName"], "group userdata"
+                )
+                return self.create_a_person(personGroupId, name, userData)
         # try:
         #     if ClassUtils.isFaceAPIError(create_a_person_json):
         #         return []

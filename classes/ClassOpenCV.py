@@ -132,3 +132,4 @@ def show_ImageText(title, hint, facepath=None, picture=None, identifyfaces=None,
     elif key == ord('a') and len(identifyfaces) == 1:  # 鍵盤 a 代表要新增 oneshot
         cv2.destroyWindow(windowname)
         #ClassTK.tk_UnknownPerson('您哪位？', facepath, picture, personname)
+
