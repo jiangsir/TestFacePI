@@ -1,6 +1,5 @@
 import urllib, http, json
 import classes.ClassConfig
-
 class Face:
     def __init__(self) -> None:
         self.config = classes.ClassConfig.Config().readConfig()
