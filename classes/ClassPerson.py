@@ -1,6 +1,9 @@
 import http.client, urllib.request, urllib.parse, urllib.error, base64, json
 import classes.ClassConfig
+import classes.ClassPersonGroup
+
 config = classes.ClassConfig.Config().readConfig()
+
 
 class Person:
     def __init__(self):
@@ -46,21 +49,28 @@ class Person:
             response = conn.getresponse()
             data = response.read()
             jsondata = json.loads(str(data, "UTF-8"))
+            print('add_a_person_face json:')
             conn.close()
 
         except Exception as e:
             print("[Errno {0}]連線失敗！請檢查網路設定。 {1}".format(e.errno, e.strerror))
 
-        try:
-            if ClassUtils.isFaceAPIError(jsondata):
-                return []
-        except MyException.RateLimitExceededError as e:
-            time.sleep(10)
-            return self.add_a_person_face(imagepath, personId, personGroupId)
-        except MyException.UnspecifiedError as e:
-            return
+        # try:
+        #     if ClassUtils.isFaceAPIError(jsondata):
+        #         return []
+        # except MyException.RateLimitExceededError as e:
+        #     time.sleep(10)
+        #     return self.add_a_person_face(imagepath, personId, personGroupId)
+        # except MyException.UnspecifiedError as e:
+        #     return
 
     def create_a_person(self, personGroupId, name, userData):
+        # person group 已經存在的話，這裡會出錯。
+        # personGroupApi = classes.ClassPersonGroup.PersonGroup()
+        # personGroupApi.createPersonGroup(
+        #     config["personGroupId"], config["personGroupName"], "group userdata"
+        # )
+
         print(
             "'create_a_person': 在 personGroupid="
             + personGroupId
@@ -87,40 +97,39 @@ class Person:
             response = conn.getresponse()
             data = response.read()
             create_a_person_json = json.loads(str(data, "UTF-8"))
+            print(create_a_person_json)
             conn.close()
         except Exception as e:
             print("[Errno {0}]連線失敗！請檢查網路設定。 {1}".format(e.errno, e.strerror))
 
-        try:
-            if ClassUtils.isFaceAPIError(create_a_person_json):
-                return []
-        except MyException.RateLimitExceededError as e:
-            time.sleep(10)
-            return self.create_a_person(personGroupId, name, userData)
-        except MyException.PersonGroupNotFoundError as e:
-            personGroupApi = PersonGroup(self.api_key, self.host)
-            personGroupApi.createPersonGroup(
-                config["personGroupId"], config["personGroupName"], "group userdata"
-            )
-            return self.create_a_person(personGroupId, name, userData)
-        except MyException.UnspecifiedError as e:
-            return
+        # try:
+        #     if ClassUtils.isFaceAPIError(create_a_person_json):
+        #         return []
+        # except MyException.RateLimitExceededError as e:
+        #     time.sleep(10)
+        #     return self.create_a_person(personGroupId, name, userData)
+        # except MyException.PersonGroupNotFoundError as e:
+        #     personGroupApi = PersonGroup(self.api_key, self.host)
+        #     personGroupApi.createPersonGroup(
+        #         config["personGroupId"], config["personGroupName"], "group userdata"
+        #     )
+        #     return self.create_a_person(personGroupId, name, userData)
+        # except MyException.UnspecifiedError as e:
+        #     return
 
         return create_a_person_json["personId"]
 
-    def add_personimages(self, personGroupId, personname, userData,
-                           imagepaths):
-        ''' # 加入一個人的一張或多張圖片，但不訓練 '''
+    def add_personimages(self, personGroupId, personname, userData, imagepaths):
+        """# 加入一個人的一張或多張圖片，但不訓練"""
         print("personname=", personname, "圖檔:", imagepaths)
-        person = self.getPersonByName(personGroupId, personname)
-        if person == None:
-            print('call create_a_person')
-            personid = self.create_a_person(personGroupId, personname,
-                                                 userData)
-            for imagepath in imagepaths:
-                self.add_a_person_face(imagepath, personid, personGroupId)
-        else:
-            print('call add_a_person_face, personId=', person['personId'])
-            for imagepath in imagepaths:
-                self.add_a_person_face(imagepath, person['personId'],
-                                            personGroupId)
+        # person = self.getPersonByName(personGroupId, personname)
+        # if person == None:
+        print("call create_a_person")
+        personid = self.create_a_person(personGroupId, personname, userData)
+        for imagepath in imagepaths:
+            self.add_a_person_face(imagepath, personid, personGroupId)
+        # else:
+        #    print('call add_a_person_face, personId=', person['personId'])
+        #    for imagepath in imagepaths:
+        #        self.add_a_person_face(imagepath, person['personId'],
+        #                                    personGroupId)

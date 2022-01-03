@@ -29,7 +29,9 @@ class FacePI:
         """1. 用 3 連拍訓練一個新人"""
         jpgimagepaths = []
         for i in range(3):
-            jpgimagepath = classes.ClassOpenCV.show_opencv(hint=" (訓練第 " + str(i + 1) + " 張)")
+            jpgimagepath = classes.ClassOpenCV.show_opencv(
+                hint=" (訓練第 " + str(i + 1) + " 張)"
+            )
             jpgimagepaths.append(jpgimagepath)
 
         if personname == None:
@@ -38,26 +40,28 @@ class FacePI:
         if userData == None:
             userData = input("請輸入您的說明文字(比如: 高師大附中國一仁): ")
 
+        basepath = os.path.dirname(os.path.realpath(__file__))
         jpgtrainpaths = []
         for jpgimagepath in jpgimagepaths:
             filename = os.path.basename(jpgimagepath)
-            home = os.path.expanduser("~")
+            # home = os.path.expanduser("~")
             jpgtrainpath = os.path.join(
-                home, "traindatas", userData, personname, filename
+                basepath, "traindatas", userData, personname, filename
             )
             if not os.path.exists(os.path.dirname(jpgtrainpath)):
                 os.makedirs(os.path.dirname(jpgtrainpath))
             os.rename(jpgimagepath, jpgtrainpath)
             jpgtrainpaths.append(jpgtrainpath)
 
-
-        myconfig = classes.ClassConfig.Config()
-        
+        myconfig = classes.ClassConfig.Config().readConfig()
 
         personAPI = classes.ClassPerson.Person()
-        personAPI.add_personimages(myconfig['personGroupId'], personname, userData, jpgtrainpaths)
+        personAPI.add_personimages(
+            myconfig["personGroupId"], personname, userData, jpgtrainpaths
+        )
         personGroupapi = classes.ClassPersonGroup.PersonGroup()
-        personGroupapi.train_personGroup(myconfig['personGroupId'])
+        personGroupapi.train_personGroup()
+
 
 if __name__ == "__main__":
     fire.Fire(FacePI)
