@@ -100,7 +100,7 @@ class FacePI:
         # classes.ClassFaceAPI.Face().detectImageUrl(imageurl)
         imagepath = classes.ClassOpenCV.show_opencv()
         # json_face_detect = classes.ClassFaceAPI.Face().detectLocalImage(imagepath)
-        self.Identify(imagepath)
+        # self.Identify(imagepath)
 
     def Train(self, userData=None, personname=None):
         """1. 用 3 連拍訓練一個新人"""
@@ -138,6 +138,8 @@ class FacePI:
         )
         personGroupapi = classes.ClassPersonGroup.PersonGroup()
         personGroupapi.train_personGroup()
+
+
 
 
 if __name__ == "__main__":
