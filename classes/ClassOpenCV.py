@@ -3,28 +3,97 @@ import time
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 import cv2, dlib
 import numpy as np
-import classes.ClassConfig
 from imutils import face_utils
 import imutils
 
-config = classes.ClassConfig.Config().readConfig()
-
-
 ttf = "C:/Windows.old/Windows/Fonts/msjhbd.ttc"  # 字體: 微軟正黑體
 
+def show_arrow(cv2, shape, img):
+    '''
+    顯示面部方向箭頭
+    '''
+    image_points = np.array([
+                tuple(shape[30]),#鼻頭
+                tuple(shape[21]),
+                tuple(shape[22]),
+                tuple(shape[39]),
+                tuple(shape[42]),
+                tuple(shape[31]),
+                tuple(shape[35]),
+                tuple(shape[48]),
+                tuple(shape[54]),
+                tuple(shape[57]),
+                tuple(shape[8]),
+                ],dtype='double')
 
-def getTakePicturePath(personGroupId):
-    ''' 取得拍照後要存檔的路徑。 '''
-    basepath = os.path.dirname(os.path.realpath(__file__))
+    
+    #cv2.FONT_HERSHEY_PLAIN, 0.7, (0, 0, 255), 2)
+    
+    model_points = np.array([
+            (0.0,0.0,0.0), # 30
+            (-30.0,-125.0,-30.0), # 21
+            (30.0,-125.0,-30.0), # 22
+            (-60.0,-70.0,-60.0), # 39
+            (60.0,-70.0,-60.0), # 42
+            (-40.0,40.0,-50.0), # 31
+            (40.0,40.0,-50.0), # 35
+            (-70.0,130.0,-100.0), # 48
+            (70.0,130.0,-100.0), # 54
+            (0.0,158.0,-10.0), # 57
+            (0.0,250.0,-50.0) # 8
+            ])
 
-    jpgimagepath = os.path.join(
-        basepath, '../takepictures', personGroupId + "_" +
-        time.strftime("%Y%m%d_%H%M%S", time.localtime()) + ".jpg")
+    #size = frame.shape
+    size = img.shape
 
-    if not os.path.exists(os.path.dirname(jpgimagepath)):
-        os.makedirs(os.path.dirname(jpgimagepath))
-    return jpgimagepath
+    focal_length = size[1]
+    center = (size[1] // 2, size[0] // 2) #顔の中心座標
 
+    camera_matrix = np.array([
+        [focal_length, 0, center[0]],
+        [0, focal_length, center[1]],
+        [0, 0, 1]
+    ], dtype='double')
+
+    dist_coeffs = np.zeros((4, 1))
+
+    (success, rotation_vector, translation_vector) = cv2.solvePnP(model_points, image_points, camera_matrix,
+                                                                    dist_coeffs, flags=cv2.SOLVEPNP_ITERATIVE)
+    #回転行列とヤコビアン
+    (rotation_matrix, jacobian) = cv2.Rodrigues(rotation_vector)
+    mat = np.hstack((rotation_matrix, translation_vector))
+
+    #yaw,pitch,rollの取り出し
+    (_, _, _, _, _, _, eulerAngles) = cv2.decomposeProjectionMatrix(mat)
+    yaw = eulerAngles[1]
+    pitch = eulerAngles[0]
+    roll = eulerAngles[2]
+
+    print("yaw",int(yaw),"pitch",int(pitch),"roll",int(roll))#頭部姿勢データの取り出し
+
+    cv2.putText(img, 'yaw : ' + str(int(yaw)), (20, 10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 2)
+    cv2.putText(img, 'pitch : ' + str(int(pitch)), (20, 25), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 2)
+    cv2.putText(img, 'roll : ' + str(int(roll)), (20, 40), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 2)
+
+    (nose_end_point2D, _) = cv2.projectPoints(np.array([(0.0, 0.0, 500.0)]), rotation_vector,
+                                                        translation_vector, camera_matrix, dist_coeffs)
+    #計算に使用した点のプロット/顔方向のベクトルの表示
+    for p in image_points:
+        cv2.drawMarker(img, (int(p[0]), int(p[1])),  (0.0, 1.409845, 255),markerType=cv2.MARKER_CROSS, thickness=1)
+
+    p1 = (int(image_points[0][0]), int(image_points[0][1]))
+    p2 = (int(nose_end_point2D[0][0][0]), int(nose_end_point2D[0][0][1]))
+
+    cv2.arrowedLine(img, p1, p2, (255, 0, 0), 2)
+
+def show_68points(cv2, shape, img):
+    '''
+    顯示 68 個特徵點
+    '''
+    # loop over the (x, y)-coordinates for the facial landmarks
+    # and draw them on the image
+    for (x, y) in shape:
+        cv2.circle(img, (x, y), 2, (0, 0, 255), -1)
 
 def show_opencv(hint='', mirror=True):
     ''' 顯示主畫面 '''
@@ -32,6 +101,7 @@ def show_opencv(hint='', mirror=True):
     #cam = cv2.VideoCapture(config['videoid'])
     print('cam opening...')
     cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    
     print('cam opened')
     cam.set(3, 1280)  # 修改解析度 寬
     cam.set(4, 1280 // 16 * 10)  # 修改解析度 高
@@ -65,10 +135,9 @@ def show_opencv(hint='', mirror=True):
             # show the face number
             cv2.putText(img, "Face #{}".format(i + 1), (x - 10, y - 10),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            # loop over the (x, y)-coordinates for the facial landmarks
-            # and draw them on the image
-            for (x, y) in shape:
-                cv2.circle(img, (x, y), 1, (0, 0, 255), -1)
+
+            show_68points(cv2, shape, img)
+            show_arrow(cv2, shape, img)
 
         cv2.imshow("Output", img)
 ###############################################
@@ -113,13 +182,14 @@ def show_opencv(hint='', mirror=True):
 
         key = cv2.waitKey(1)
         if key == ord(' ') or key == 3 or key == 13:  # space or enter
-            picturepath = getTakePicturePath(
-                config['personGroupId'])
-            ret_val, img = cam.read()
-            cv2.imwrite(picturepath, img)
-            cv2.destroyAllWindows()
-            cv2.VideoCapture(0).release()
-            return picturepath
+            # picturepath = getTakePicturePath(
+            #     config['personGroupId'])
+            # ret_val, img = cam.read()
+            # cv2.imwrite(picturepath, img)
+            # cv2.destroyAllWindows()
+            # cv2.VideoCapture(0).release()
+            # return picturepath
+            pass
         elif key == 27:  # esc to quit
             cv2.destroyAllWindows()
             cv2.VideoCapture(0).release()
