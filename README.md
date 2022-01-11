@@ -1,4 +1,4 @@
-# TestFacePI
+# 轉移到 HeadPose 專案
 
 ## 安裝 anaconda
 conda create -n dlib python=3.6.9
