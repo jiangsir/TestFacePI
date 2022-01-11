@@ -84,7 +84,7 @@ def show_arrow(cv2, shape, img):
     p1 = (int(image_points[0][0]), int(image_points[0][1]))
     p2 = (int(nose_end_point2D[0][0][0]), int(nose_end_point2D[0][0][1]))
 
-    cv2.arrowedLine(img, p1, p2, (255, 0, 0), 2)
+    cv2.arrowedLine(img, p1, p2, (255, 255, 0), 2) # 面部方向箭頭
 
 def show_68points(cv2, shape, img):
     '''
