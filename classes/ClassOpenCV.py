@@ -1,9 +1,12 @@
 import os
 import time
 from PIL import Image, ImageDraw, ImageFont, ImageTk
-import cv2
+import cv2, dlib
 import numpy as np
 import classes.ClassConfig
+from imutils import face_utils
+import imutils
+
 config = classes.ClassConfig.Config().readConfig()
 
 
@@ -33,11 +36,51 @@ def show_opencv(hint='', mirror=True):
     cam.set(3, 1280)  # 修改解析度 寬
     cam.set(4, 1280 // 16 * 10)  # 修改解析度 高
     print('WIDTH', cam.get(3), 'HEIGHT', cam.get(4))  # 顯示預設的解析度
+    # Dlib 的人臉偵測器
+    detector = dlib.get_frontal_face_detector()
+    predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
     while True:
         ret_val, img = cam.read()
         if mirror:
             img = cv2.flip(img, 1)
+
+        # image = imutils.resize(img, width=500)
+        # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        # 偵測人臉
+        face_rects = detector(img, 0)
+
+###############################################
+        for (i, rect) in enumerate(face_rects):
+            # determine the facial landmarks for the face region, then
+            # convert the facial landmark (x, y)-coordinates to a NumPy
+            # array
+            shape = predictor(img, rect)
+            shape = face_utils.shape_to_np(shape)
+            # convert dlib's rectangle to a OpenCV-style bounding box
+            # [i.e., (x, y, w, h)], then draw the face bounding box
+            (x, y, w, h) = face_utils.rect_to_bb(rect)
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            # show the face number
+            cv2.putText(img, "Face #{}".format(i + 1), (x - 10, y - 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            # loop over the (x, y)-coordinates for the facial landmarks
+            # and draw them on the image
+            for (x, y) in shape:
+                cv2.circle(img, (x, y), 1, (0, 0, 255), -1)
+
+        cv2.imshow("Output", img)
+###############################################
+        # # 取出所有偵測的結果
+        # for i, d in enumerate(face_rects):
+        #     x1 = d.left()
+        #     y1 = d.top()
+        #     x2 = d.right()
+        #     y2 = d.bottom()
+
+        #     # 以方框標示偵測的人臉
+        #     cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 4, cv2.LINE_AA)
 
         H, W = img.shape[:2]
 
