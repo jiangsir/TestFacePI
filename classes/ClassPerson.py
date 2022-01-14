@@ -49,7 +49,7 @@ class Person:
             response = conn.getresponse()
             data = response.read()
             jsondata = json.loads(str(data, "UTF-8"))
-            print('add_a_person_face json:')
+            print("add_a_person_face json:")
             conn.close()
 
         except Exception as e:
@@ -102,6 +102,14 @@ class Person:
         except Exception as e:
             print("[Errno {0}]連線失敗！請檢查網路設定。 {1}".format(e.errno, e.strerror))
 
+        if "error" in create_a_person_json:
+            print("Error: " + create_a_person_json["error"]["code"])
+            if create_a_person_json["error"]["code"] == "PersonGroupNotFound":
+                personGroupApi = classes.ClassPersonGroup.PersonGroup()
+                personGroupApi.createPersonGroup(
+                    config["personGroupId"], config["personGroupName"], "group userdata"
+                )
+                return self.create_a_person(personGroupId, name, userData)
         # try:
         #     if ClassUtils.isFaceAPIError(create_a_person_json):
         #         return []
@@ -133,3 +141,37 @@ class Person:
         #    for imagepath in imagepaths:
         #        self.add_a_person_face(imagepath, person['personId'],
         #                                    personGroupId)
+
+    def get_a_person(self, personId, personGroupId):
+        headers = {
+            # Request headers
+            'Ocp-Apim-Subscription-Key': self.api_key,
+        }
+
+        params = urllib.parse.urlencode({})
+
+        try:
+            conn = http.client.HTTPSConnection(self.host)
+            conn.request("GET", "/face/v1.0/persongroups/" + personGroupId +
+                         "/persons/" + personId + "?%s" % params, "{body}",
+                         headers)
+            response = conn.getresponse()
+            data = response.read()
+            personjson = json.loads(str(data, 'UTF-8'))
+            conn.close()
+
+            # try:
+            #     if ClassUtils.isFaceAPIError(personjson):
+            #         return None
+            # except MyException.RateLimitExceededError as e:
+            #     time.sleep(10)
+            #     return self.get_a_person(personId, personGroupId)
+            # except MyException.UnspecifiedError as e:
+            #     return
+            # except MyException.PersonGroupNotTrainedError as e:
+            #     print('ERROR: get_a_person.PersonGroupNotTrainedError')
+            #     return
+            return personjson
+            
+        except Exception as e:
+            print("[Errno {0}]連線失敗！請檢查網路設定。 {1}".format(e.errno, e.strerror))
